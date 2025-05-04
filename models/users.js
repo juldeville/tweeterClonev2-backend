@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const { token } = require("morgan");
 
 const userSchema = mongoose.Schema({
   firstname: { type: String, required: true },
