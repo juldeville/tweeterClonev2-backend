@@ -1,6 +1,6 @@
 const User = require("../models/users");
 
-function checkUser({ exists = true }) {
+function checkUserByUsername({ exists = true }) {
   return async (req, res, next) => {
     try {
       const user = await User.findOne({ username: req.body.username });
@@ -9,7 +9,7 @@ function checkUser({ exists = true }) {
       } else if (!exists && user) {
         return res.status(409).json({ result: false, error: "User already exists" });
       }
-      req.user = user;
+      if (exists && user) req.user = user;
       next();
     } catch (err) {
       res.status(500).json({ result: false, error: err.message });
@@ -17,4 +17,4 @@ function checkUser({ exists = true }) {
   };
 }
 
-module.exports = { checkUser };
+module.exports = { checkUserByUsername };

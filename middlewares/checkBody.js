@@ -9,6 +9,7 @@ function checkBody(requiredFields) {
         .status(400)
         .json({ result: false, error: `missing these fields: ${missingFields} ` });
     }
+
     next();
   };
 }

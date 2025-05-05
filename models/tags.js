@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const tagSchema = mongoose.Schema({
-  name: { type: String, required: true },
+  tag: { type: String, required: true },
   tweets: [{ type: mongoose.Schema.Types.ObjectId, ref: "tweets" }],
 });
 

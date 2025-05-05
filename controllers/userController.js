@@ -1,7 +1,6 @@
 const uid2 = require("uid2");
 const bcrypt = require("bcrypt");
 const User = require("../models/users");
-const token = require("uid2");
 
 async function createUser(req, res) {
   try {
@@ -24,21 +23,28 @@ async function createUser(req, res) {
       },
     });
   } catch (err) {
-    res.status(400).json({ result: false, error: err.message });
+    res.status(500).json({ result: false, error: err.message });
   }
 }
 
 async function authenticateUser(req, res) {
   try {
     const { password } = req.body;
-    const user = req.user;
-    if (bcrypt.compareSync(password, user.password)) {
-      res.json({ result: true, token: user.token });
+    const userData = req.user;
+    if (bcrypt.compareSync(password, userData.password)) {
+      res.json({
+        result: true,
+        user: {
+          username: userData.username,
+          firstname: userData.firstname,
+          token: userData.token,
+        },
+      });
     } else {
       res.json({ result: false, error: "Incorrect password" });
     }
   } catch (err) {
-    res.json({ result: false, error: err.message });
+    res.status(500).json({ result: false, error: err.message });
   }
 }
 
