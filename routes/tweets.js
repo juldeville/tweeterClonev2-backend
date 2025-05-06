@@ -5,7 +5,7 @@ const { authenticateByToken } = require("../middlewares/authenticateByToken");
 var router = express.Router();
 
 router.post("/newTweet", checkBody(["content", "token"]), authenticateByToken(), createTweet);
-router.get("/getTweets", getTweets);
+router.get("/getTweets/:token", getTweets);
 router.put("/updateLike", checkBody(["tweetId", "token"]), authenticateByToken(), updateLike);
 
 // router.delete("/deleteTweet");

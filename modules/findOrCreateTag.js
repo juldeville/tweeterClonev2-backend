@@ -1,5 +1,5 @@
 const Tag = require("../models/tags");
-
+const Tweet = require("../models/tweets");
 async function findOrCreateTag(tagProp) {
   let tagId = null;
   let tagDoc;
@@ -24,4 +24,4 @@ async function findOrCreateTag(tagProp) {
   }
 }
 
-module.exports = findOrCreateTag;
+module.exports = { findOrCreateTag };

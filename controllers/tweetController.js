@@ -1,8 +1,10 @@
 const Tweet = require("../models/tweets");
 const User = require("../models/users");
 const Tag = require("../models/tags");
-const findOrCreateTag = require("../modules/findOrCreateTag");
-
+const { findOrCreateTag } = require("../modules/findOrCreateTag");
+const { updateTweetLikes } = require("../modules/updateTweetLikes");
+const { updateLikeStatus } = require("../modules/updateLikeStatus");
+const { getUserId } = require("../modules/getUserId");
 async function createTweet(req, res) {
   try {
     const { tag, content } = req.body;
@@ -29,9 +31,13 @@ async function getTweets(req, res) {
   try {
     const tweets = await Tweet.find().populate(["tag", "user"]);
     if (tweets.length === 0) {
-      res.json({ result: false, error: "no tweets foudn" });
+      return res.json({ result: true, error: "no tweets found" });
     }
-    res.json({ result: true, tweets });
+
+    const userId = await getUserId(req.params.token);
+
+    const formattedTweets = updateLikeStatus(tweets, userId);
+    res.json({ result: true, formattedTweets });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
   }
@@ -42,14 +48,10 @@ async function updateLike(req, res) {
     const { tweetId } = req.body;
     const user = req.user;
 
-    const tweet = await Tweet.findById(tweetId);
-    if (!tweet) return res.status(404).json({ result: false, error: "Tweet not found" });
-    const isLiked = tweet.likes.includes(user._id);
-    const update = isLiked ? { $pull: { likes: user._id } } : { $push: { likes: user._id } };
-    const result = await Tweet.updateOne({ _id: tweetId }, update);
+    const update = await updateTweetLikes(tweetId, user._id);
 
-    if (result.modifiedCount === 1) {
-      res.json({ result: true, liked: !isLiked });
+    if (update.result.modifiedCount === 1) {
+      res.json({ result: true, isLiked: update.likeStatus });
     } else {
       res.json({ result: false, error: "Tweet not updated" });
     }
