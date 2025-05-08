@@ -10,11 +10,20 @@ async function createTweet(req, res) {
     const { tag, content } = req.body;
     const user = req.user;
 
+    if (!tag) {
+      const newDoc = new Tweet({
+        user: user._id,
+        content,
+      });
+      const newTweet = await newDoc.save();
+      return res.json({ result: true, newTweet });
+    }
+
     const { tagDoc, tagId } = await findOrCreateTag(tag);
 
     const newDoc = new Tweet({
       user: user._id,
-      content: content,
+      content,
       tag: tagId,
     });
 

@@ -1,7 +1,7 @@
 const { checkBody } = require("../middlewares/checkBody");
 const { createTweet, getTweets, updateLike } = require("../controllers/tweetController");
-var express = require("express");
 const { authenticateByToken } = require("../middlewares/authenticateByToken");
+var express = require("express");
 var router = express.Router();
 
 router.post("/newTweet", checkBody(["content", "token"]), authenticateByToken(), createTweet);
