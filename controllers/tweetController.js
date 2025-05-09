@@ -1,10 +1,10 @@
 const Tweet = require("../models/tweets");
 const User = require("../models/users");
 const Tag = require("../models/tags");
-const { findOrCreateTag } = require("../modules/findOrCreateTag");
-const { updateTweetLikes } = require("../modules/updateTweetLikes");
-const { updateLikeStatus } = require("../modules/updateLikeStatus");
-const { getUserId } = require("../modules/getUserId");
+const { findOrCreateTag } = require("../db/findOrCreateTag");
+const { updateTweetLikes } = require("../db/updateTweetLikes");
+const { updateLikeStatus } = require("../db/updateLikeStatus");
+const { getUserId } = require("../db/getUserId");
 async function createTweet(req, res) {
   try {
     const { tag, content } = req.body;
@@ -70,4 +70,17 @@ async function updateLike(req, res) {
   }
 }
 
-module.exports = { createTweet, getTweets, updateLike };
+async function deleteTweet(req, res) {
+  try {
+    const deleted = await Tweet.deleteOne({ _id: req.body.tweetId });
+
+    if (deleted.deletedCount === 0) {
+      throw new Error("Delete failed or tweet not found");
+    }
+    res.json({ result: true });
+  } catch (err) {
+    res.status(500).json({ result: false, error: err.message });
+  }
+}
+
+module.exports = { createTweet, getTweets, updateLike, deleteTweet };

@@ -5,7 +5,8 @@ async function findOrCreateTag(tagProp) {
   let tagDoc;
 
   try {
-    const tagExists = await Tag.findOne({ name: tagProp });
+    const tagExists = await Tag.findOne({ tag: tagProp });
+    console.log("tagExists is: ", tagExists);
     if (!tagExists) {
       const newDoc = new Tag({
         tag: tagProp,
