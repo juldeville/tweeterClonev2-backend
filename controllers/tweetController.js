@@ -9,7 +9,6 @@ async function createTweet(req, res) {
   try {
     const { tag, content } = req.body;
     const user = req.user;
-
     if (!tag) {
       const newDoc = new Tweet({
         user: user._id,
@@ -18,19 +17,16 @@ async function createTweet(req, res) {
       const newTweet = await newDoc.save();
       return res.json({ result: true, newTweet });
     }
-
     const { tagDoc, tagId } = await findOrCreateTag(tag);
-
     const newDoc = new Tweet({
       user: user._id,
       content,
       tag: tagId,
     });
-
     const newTweet = await newDoc.save();
     await Tag.updateOne({ _id: tagDoc._id }, { $push: { tweets: newTweet._id } });
-
-    res.json({ result: true, newTweet });
+    const formattedTweet = await newTweet.populate("tag");
+    res.json({ result: true, formattedTweet });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
   }
@@ -72,6 +68,15 @@ async function updateLike(req, res) {
 
 async function deleteTweet(req, res) {
   try {
+    const tweet = await Tweet.findOne({ _id: req.body.tweetId });
+    const tagDoc = tweet.tag.toString();
+
+    await Tag.updateOne({ _id: tagDoc }, { $pull: { tweets: tweet._id } });
+    const updatedTag = await Tag.findOne({ _id: tagDoc });
+    if (updatedTag.tweets.length === 0) {
+      await Tag.deleteOne({ _id: tagDoc });
+    }
+
     const deleted = await Tweet.deleteOne({ _id: req.body.tweetId });
 
     if (deleted.deletedCount === 0) {
