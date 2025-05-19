@@ -34,15 +34,19 @@ async function createTweet(req, res) {
 
 async function getTweets(req, res) {
   try {
-    const tweets = await Tweet.find().populate(["tag", "user"]);
+    const { tagId } = req.query;
+    const filter = tagId ? { tag: tagId } : {};
+    const tweets = await Tweet.find(filter).populate(["tag", "user"]);
+    const tagDoc = tagId ? await Tag.findById(tagId) : null;
+
     if (tweets.length === 0) {
-      return res.json({ result: true, error: "no tweets found" });
+      return res.json({ result: true, message: "no tweets found" });
     }
 
     const userId = await getUserId(req.params.token);
 
     const formattedTweets = updateLikeStatus(tweets, userId);
-    res.json({ result: true, formattedTweets });
+    res.json({ result: true, formattedTweets, tagName: tagDoc?.tag || null });
   } catch (error) {
     res.status(500).json({ result: false, error: error.message });
   }
